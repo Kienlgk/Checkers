@@ -57,7 +57,7 @@ class Player:
 				if cell != 'b': steps.extend(rSteps)
 				if cell != 'r': steps.extend(bSteps)
 				return steps
-			def getJumpSteps:
+			def getJumpSteps():
 				Steps = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 				return Steps
 			def generateMoves(board, i, j, states):
@@ -70,7 +70,7 @@ class Player:
 					x, y = i, j
 					# print(x)
 					if board[i][j] == 'R' or board[i][j] == 'B':
-						print("isKing ", board[i][j])
+						# print("isKing ", board[i][j])
 						while 0 <= x and x <= 7 and 0 <= y and y <= 7:
 							# z += 1
 							x, y = x + step[0], y + step[1]
@@ -100,30 +100,36 @@ class Player:
 				jumpEnd = True
 				# if not self.isKingJump:
 				if board[i][j] == 'R'or board[i][j] == 'B':
-					for step in getJumpSteps:
-						while 0 <= x and x <= 7 and 0 <= y and y <= 7:
-							x, y = i + step[0], j + step[1]
+					for step in getJumpSteps():
+						x, y = i, j
+						while 0 <= x + step[0] and x + step[0] <= 7 and 0 <= y + step[1] and y + step[1] <= 7:
+							prevChar = board[x][y]
+							x, y = x + step[0], y + step[1]
+							if (prevChar != '.' and (x - step[0]) != i and (y - step[1]) != j):
+								break
 							if x >= 0 and x <= 7 and y >= 0 and y <= 7 and board[x][y] != '.' and board[i][j].lower() != board[x][y].lower():
-								xp, yp = x + step[0], y + step[1]
-								if xp >= 0 and xp <= 7 and yp >= 0 and yp <= 7 and board[xp][yp] == '.':
-									board[xp][yp], save = board[i][j], board[x][y]
-									board[i][j] = board[x][y] = '.'
-									previous = board[xp][yp]
-									# promoted
-									if (xp == 7 and state.str == 'b') or (xp == 0 and state.str == 'r'):
-										board[xp][yp] = board[xp][yp].upper()
-										# self.isKingJump = True
+								xp, yp = x, y
+								while 0 <= xp + step[0] and xp + step[0] <= 7 and 0 <= yp + step[1] and yp <= 7 + step[1]:
+									xp, yp = xp + step[0], yp + step[1]
+									if xp >= 0 and xp <= 7 and yp >= 0 and yp <= 7 and board[xp][yp] == '.':
+										board[xp][yp], save = board[i][j], board[x][y]
+										board[i][j] = board[x][y] = '.'
+										previous = board[xp][yp]
+										# promoted
+										if (xp == 7 and state.str == 'b') or (xp == 0 and state.str == 'r'):
+											board[xp][yp] = board[xp][yp].upper()
+											# self.isKingJump = True
 
-									moves.append((xp, yp))
-									generateJumps(board, xp, yp, moves, states)
-									moves.pop()
-									board[i][j], board[x][y], board[xp][yp] = previous, save, '.'
-									jumpEnd = False
-									# self.isKingJump = False
+										moves.append((xp, yp))
+										generateJumps(board, xp, yp, moves, states)
+										moves.pop()
+										board[i][j], board[x][y], board[xp][yp] = previous, save, '.'
+										jumpEnd = False
+										# self.isKingJump = False
 					if jumpEnd and len(moves) > 1:
 						states.append(CheckersState(deepcopy(board), not state.blackToMove, deepcopy(moves)))
 				else:
-					for step in getJumpSteps:
+					for step in getJumpSteps():
 						x, y = i + step[0], j + step[1]
 						if x >= 0 and x <= 7 and y >= 0 and y <= 7 and board[x][y] != '.' and board[i][j].lower() != board[x][y].lower():
 							xp, yp = x + step[0], y + step[1]
