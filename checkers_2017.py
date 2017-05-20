@@ -103,10 +103,17 @@ class Player:
 					for step in getJumpSteps():
 						x, y = i, j
 						while 0 <= x + step[0] and x + step[0] <= 7 and 0 <= y + step[1] and y + step[1] <= 7:
-							prevChar = board[x][y]
+							# prevChar = board[x][y]
+							# x, y = x + step[0], y + step[1]
+							# if (prevChar != '.' and (x - step[0]) != i and (y - step[1]) != j):
+							# 	break
 							x, y = x + step[0], y + step[1]
-							if (prevChar != '.' and (x - step[0]) != i and (y - step[1]) != j):
-								break
+							xNext, yNext = x + step[0], y + step[1]
+							if (0 <= xNext and xNext <= 7 and 0 <= yNext and yNext <= 7):
+								nextChar = board[xNext][yNext]
+								if x >= 0 and x <= 7 and y >= 0 and y <= 7 and board[x][y] != '.' and nextChar != '.':
+									break
+							# check place end
 							if x >= 0 and x <= 7 and y >= 0 and y <= 7 and board[x][y] != '.' and board[i][j].lower() != board[x][y].lower():
 								xp, yp = x, y
 								while 0 <= xp + step[0] and xp + step[0] <= 7 and 0 <= yp + step[1] and yp <= 7 + step[1]:
@@ -121,11 +128,19 @@ class Player:
 											# self.isKingJump = True
 
 										moves.append((xp, yp))
+										if i == 7 and j == 0:
+											print("x,y: ",x, ", ", y)
+											print("i,j: ",i, ", ", j)
+										# print("moves: ----------")
+										# for move in moves:
+										# 	print(move)
+										# print("end moves -------")
 										generateJumps(board, xp, yp, moves, states)
 										moves.pop()
 										board[i][j], board[x][y], board[xp][yp] = previous, save, '.'
 										jumpEnd = False
 										# self.isKingJump = False
+							# end check place end
 					if jumpEnd and len(moves) > 1:
 						states.append(CheckersState(deepcopy(board), not state.blackToMove, deepcopy(moves)))
 				else:
@@ -159,7 +174,14 @@ class Player:
 					if state.grid[i][j].lower() == state.str:
 						# self.isKingJump = False
 						generateJumps(state.grid, i, j, [(i, j)], states)
-			if len(states) > 0: return states
+			longestMove = 0
+			longestStates = None
+			for state in states:
+				if len(state.moves) > longestMove:
+					longestMove = len(state.moves)
+					longestStates = state
+			if len(states) > 0:
+				return [longestStates]
 
 			# generate moves
 			for i in range(8):
